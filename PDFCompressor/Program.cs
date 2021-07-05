@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 
 namespace PDFCompressor
 {
@@ -6,7 +7,9 @@ namespace PDFCompressor
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var compressor = new Compressor();
+            string nombreArchivo = args[0];
+            compressor.Search(nombreArchivo);
         }
     }
 }

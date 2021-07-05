@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PDFCompressor": {
+      "commandName": "Project",
+      "commandLineArgs": "NOR020120"
+    }
+  }
+}
