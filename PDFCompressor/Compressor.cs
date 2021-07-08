@@ -100,13 +100,16 @@ namespace PDFCompressor
             string pathNewPdf = @$"{_config.GetSection("files:locations:0:path").Value}/PDF{nombreArchivo}.pdf";
 
             WriterProperties wp = new WriterProperties();
-            wp.SetPdfVersion(PdfVersion.PDF_2_0);
+            wp.SetPdfVersion(PdfVersion.PDF_1_7);
             wp.SetCompressionLevel(9);
             wp.SetFullCompressionMode(true);
-            wp.AddXmpMetadata();
             PdfWriter writer = new PdfWriter(pathNewPdf, wp);
             PdfDocument pdf = new PdfDocument(writer);
 
+            PdfDocumentInfo info = pdf.GetDocumentInfo();
+            info.SetAuthor("Norte");
+            info.SetKeywords("Diario, Norte");
+            info.SetTitle($"PDF{nombreArchivo}");
 
 
             if (pageInit != null || pageFinal != null)
@@ -127,10 +130,6 @@ namespace PDFCompressor
                 reader.Close();
                 pdfDocument.Close();
             }
-
-            PdfDocumentInfo info = pdf.GetDocumentInfo();
-            info.SetAuthor("Norte");
-            info.SetKeywords("Diario, Norte");
             
             pdf.Close();
             writer.Close();
