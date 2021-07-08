@@ -9,13 +9,18 @@ using iText.Kernel.Colors;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using iText.Kernel.Font;
+using iText.IO.Font.Constants;
+using System;
+using iText.Layout.Borders;
 
 namespace PDFCompressor
 {
     public class Compressor
     {
-        public Compressor()
+        public Compressor(string firma)
         {
+            Firma = firma;
             var builder = new ConfigurationBuilder()
                 .AddJsonFile($"appsettings.json", true, true);
 
@@ -24,6 +29,9 @@ namespace PDFCompressor
 
         private readonly IConfiguration _config;
 
+        private readonly int separacionSuperior = 25;
+
+        public string Firma { get; set; }
         public int Search(string nombreArchivo)
         {
             var originFolder = _config.GetSection("files:locations:1:path").Value;
@@ -44,15 +52,62 @@ namespace PDFCompressor
                 return 1;
             }
         }
+
+        public void Firmar(PdfDocument pdf)
+        {
+            PdfCanvas canvas = new PdfCanvas(pdf.GetLastPage());
+            var widthPage = pdf.GetLastPage().GetPageSize().GetWidth();
+            var heightPage = pdf.GetLastPage().GetPageSize().GetHeight();
+
+            canvas.SaveState()
+                .SetStrokeColor(ColorConstants.RED)
+                .SetLineWidth(.2f)
+                .Stroke()
+                .RestoreState();
+
+            Canvas canvasFirma = new Canvas(canvas, pdf.GetLastPage().GetPageSize());
+
+            PdfFont normal = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+
+            Text textoDeLaFirma = new Text(this.Firma)
+                .SetFontSize(24)
+                .SetFont(normal)
+                ;
+            Text textoDeProhibicion = new Text("Queda prohíbida su distribución.")
+                .SetFontSize(12)
+                .SetFont(normal)
+                .SetItalic()
+                ;
+
+            Paragraph firma = new Paragraph()
+                                .Add(textoDeLaFirma)
+                                .Add(textoDeProhibicion)
+                                .SetBorder(new SolidBorder(ColorConstants.RED,2))
+                                .SetWidth(widthPage / 2)
+                                ;
+
+            canvasFirma
+                .SetFontColor(ColorConstants.RED)
+                .ShowTextAligned(firma, widthPage / 2, heightPage - separacionSuperior, TextAlignment.CENTER, VerticalAlignment.MIDDLE)
+                .Close();
+
+            canvas.Release();
+        }
+
         public int ComprimirPaginas(IEnumerable<System.IO.FileInfo> fileQuery, string nombreArchivo, int? pageInit = null, int? pageFinal = null)
         {
-            FileStream newPdf = new FileStream($"{_config.GetSection("files:locations:0:path").Value}/PDF{nombreArchivo}.pdf", FileMode.Create); //@"D:\\GitHub\\Laburo\\Comprimidos\\*.pdf"
+
+            string pathNewPdf = @$"{_config.GetSection("files:locations:0:path").Value}/PDF{nombreArchivo}.pdf";
+
             WriterProperties wp = new WriterProperties();
             wp.SetPdfVersion(PdfVersion.PDF_2_0);
             wp.SetCompressionLevel(9);
             wp.SetFullCompressionMode(true);
-            PdfWriter writer = new PdfWriter(newPdf, wp);
+            wp.AddXmpMetadata();
+            PdfWriter writer = new PdfWriter(pathNewPdf, wp);
             PdfDocument pdf = new PdfDocument(writer);
+
+
 
             if (pageInit != null || pageFinal != null)
             {
@@ -67,37 +122,18 @@ namespace PDFCompressor
 
                 pdfDocument.CopyPagesTo(1, 1, pdf);
 
-                PdfCanvas canvas = new PdfCanvas(pdf.GetLastPage());
-                var widthPage = pdf.GetLastPage().GetPageSize().GetWidth();
-
-                canvas.SaveState()
-                    .SetStrokeColor(ColorConstants.RED)
-                    .SetLineWidth(.2f)
-                    .Stroke()
-                    .RestoreState();
-
-                Canvas canvasFirma = new Canvas(canvas, pdf.GetLastPage().GetPageSize());
-
-                Text firma1 = new Text("TEST1")
-                    .SetFontSize(32)
-                    ;
-
-                Paragraph firma = new Paragraph().Add(firma1);
-
-                canvasFirma
-                    .SetFontColor(ColorConstants.RED)
-                    .ShowTextAligned(firma, widthPage / 2, 0, TextAlignment.CENTER)
-                    .Close();
-
-                canvas.Release();
+                this.Firmar(pdf);
 
                 reader.Close();
                 pdfDocument.Close();
             }
 
+            PdfDocumentInfo info = pdf.GetDocumentInfo();
+            info.SetAuthor("Norte");
+            info.SetKeywords("Diario, Norte");
+            
             pdf.Close();
             writer.Close();
-            newPdf.Close();
             return 0;
         }
     }

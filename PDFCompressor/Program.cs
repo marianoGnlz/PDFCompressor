@@ -7,8 +7,9 @@ namespace PDFCompressor
     {
         static void Main(string[] args)
         {
-            var compressor = new Compressor();
             string nombreArchivo = args[0];
+
+            var compressor = new Compressor(args[1]);
             compressor.Search(nombreArchivo);
         }
     }
