@@ -73,7 +73,7 @@ namespace PDFCompressor
                 .SetFontSize(24)
                 .SetFont(normal)
                 ;
-            Text textoDeProhibicion = new Text("Queda prohíbida su distribución.")
+            Text textoDeProhibicion = new Text("\nQueda prohíbida su distribución.")
                 .SetFontSize(12)
                 .SetFont(normal)
                 .SetItalic()
