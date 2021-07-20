@@ -12,6 +12,8 @@
 
 appsettings.json
 
+*.json
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

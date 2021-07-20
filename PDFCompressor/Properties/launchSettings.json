@@ -2,7 +2,7 @@
   "profiles": {
     "PDFCompressor": {
       "commandName": "Project",
-      "commandLineArgs": "030120 \"Este archivo es una edición gratuita\""
+      "commandLineArgs": "030120"
     }
   }
 }

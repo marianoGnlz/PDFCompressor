@@ -13,6 +13,8 @@ using iText.Kernel.Font;
 using iText.IO.Font.Constants;
 using System;
 using iText.Layout.Borders;
+using System.Data.SqlClient;
+using System.Data;
 
 namespace PDFCompressor
 {
@@ -98,6 +100,20 @@ namespace PDFCompressor
         {
 
             string pathNewPdf = @$"{_config.GetSection("files:locations:0:path").Value}/PDF{nombreArchivo}.pdf";
+
+            using (SqlConnection connection = new SqlConnection(@$"{_config.GetSection("ConnectionStrings:DefaultConnection").Value}"))
+            {
+                connection.Open();
+                string sql = "INSERT INTO Archivos(Nombre,Ruta,CreatedAt) VALUES(@param2,@param3,@param4)";
+                using (SqlCommand cmd = new SqlCommand(sql, connection))
+                {
+                    cmd.Parameters.Add("@param2", SqlDbType.VarChar, 50).Value = nombreArchivo;
+                    cmd.Parameters.Add("@param3", SqlDbType.VarChar, 50).Value = pathNewPdf;
+                    cmd.Parameters.Add("@param4", SqlDbType.DateTime, 50).Value = DateTime.Now;
+                    cmd.CommandType = CommandType.Text;
+                    cmd.ExecuteNonQuery();
+                }
+            }
 
             WriterProperties wp = new WriterProperties();
             wp.SetPdfVersion(PdfVersion.PDF_1_7);

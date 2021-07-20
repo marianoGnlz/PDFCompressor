@@ -9,6 +9,7 @@ namespace PDFCompressor
         {
             string nombreArchivo = args[0];
 
+
             var compressor = new Compressor("Este archivo es una copia gratuita");
             compressor.Search(nombreArchivo);
         }
